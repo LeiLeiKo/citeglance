@@ -1,4 +1,4 @@
-"""Paper Watch desktop client for Windows and Python installations with Tk."""
+"""CiteGlance desktop client for Windows and Python installations with Tk."""
 
 from copy import deepcopy
 from datetime import datetime
@@ -52,7 +52,7 @@ class PaperWatch(tk.Tk):
         self.ui_language = self.settings["ui_language"]
         if not isinstance(self.ui_language, str) or self.ui_language not in INTERFACE_LANGUAGES:
             self.ui_language = "zh"
-        self.title(self.t("论文追踪"))
+        self.title(self.t(bot.APP_TITLE))
         self.static_labels = []
         self.tab_labels = []
         self.table_labels = []
@@ -93,7 +93,7 @@ class PaperWatch(tk.Tk):
 
         header = ttk.Frame(self, padding=(24, 15, 24, 10))
         header.pack(fill="x")
-        self.label(header, "论文追踪", font=TITLE_FONT).pack(side="left")
+        self.label(header, bot.APP_TITLE, font=TITLE_FONT).pack(side="left")
         self.locale_picker = ttk.Combobox(header, values=tuple(INTERFACE_LANGUAGES.values()),
                                          state="readonly", width=13)
         self.locale_picker.current(tuple(INTERFACE_LANGUAGES).index(self.ui_language))
@@ -222,7 +222,7 @@ class PaperWatch(tk.Tk):
             return
         self.settings = fresh
         self.ui_language = language
-        self.title(self.t("论文追踪"))
+        self.title(self.t(bot.APP_TITLE))
         for widget, caption in self.static_labels:
             widget.configure(text=self.t(caption))
         for tab, caption in self.tab_labels:
@@ -1144,4 +1144,4 @@ if __name__ == "__main__":
             language = saved_settings(DATA_DIRECTORY)["ui_language"]
         except (OSError, ValueError):
             language = "zh"
-        messagebox.showerror(translate(language, "无法启动论文追踪"), translate_error(language, error))
+        messagebox.showerror(translate(language, "无法启动 CiteGlance"), translate_error(language, error))

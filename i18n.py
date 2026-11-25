@@ -12,7 +12,7 @@ PRESET_CHANNELS = (
 )
 
 TEXT = {
-    "论文追踪": ("Paper Watch", "論文トラッカー"),
+    "CiteGlance · 文献雷达": ("CiteGlance", "CiteGlance · 論文レーダー"),
     "界面语言": ("Interface language", "表示言語"),
     "已载入本机论文库": ("Local library loaded", "ローカルの論文ライブラリを読み込みました"),
     "论文库": ("Library", "論文ライブラリ"),
@@ -260,7 +260,7 @@ TEXT = {
     "操作未完成": ("Operation incomplete", "操作を完了できませんでした"),
     "确定": ("OK", "OK"),
     "取消": ("Cancel", "キャンセル"),
-    "无法启动论文追踪": ("Could not start Paper Watch", "論文トラッカーを起動できませんでした"),
+    "无法启动 CiteGlance": ("Could not start CiteGlance", "CiteGlanceを起動できませんでした"),
     "无法保存界面语言": ("Could not save the interface language", "表示言語を保存できませんでした"),
     "无法解密保存的密钥，请在设置中重新输入。": (
         "The saved key could not be decrypted. Enter it again in Settings.",

@@ -19,6 +19,8 @@ STATE_FILE = ROOT / "state.json"
 SEARCH_URL = "https://api.semanticscholar.org/graph/v1/paper/search/bulk"
 FIELDS = "title,abstract,publicationDate,year,venue,url,externalIds,authors"
 REQUEST_BUDGET = 20
+APP_NAME = "CiteGlance"
+APP_TITLE = "CiteGlance · 文献雷达"
 JAPAN_TIME = timezone(timedelta(hours=9))
 
 
@@ -301,7 +303,7 @@ def format_entry(row):
 
 
 def report_chunks(today, rows, failures, used):
-    heading = f"论文追踪｜{today}（日本时间）\n本次新发现 {len(rows)} 篇 · Semantic Scholar 请求 {used} 次"
+    heading = f"{APP_TITLE}｜{today}（日本时间）\n本次新发现 {len(rows)} 篇 · Semantic Scholar 请求 {used} 次"
     if failures:
         heading += "\n检索未完成：" + "；".join(
             f"频道 {number}（{reason}）" for number, reason in sorted(failures)
@@ -318,7 +320,7 @@ def report_chunks(today, rows, failures, used):
             entry = raw[:6598].decode("utf-16-le", errors="ignore") + "…"
         if len((message + "\n\n" + entry).encode("utf-16-le")) > 7600:
             yield message, keys
-            message = f"论文追踪｜{today}（续）"
+            message = f"{APP_TITLE}｜{today}（续）"
             keys = set()
         message += "\n\n" + entry
         keys.update(identifiers)
@@ -337,7 +339,7 @@ def telegram_call(token, method, **params):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Semantic Scholar 四频道论文日更")
+    parser = argparse.ArgumentParser(description=f"{APP_NAME} · Semantic Scholar 论文追踪")
     argparse_modes = parser.add_mutually_exclusive_group()
     argparse_modes.add_argument("--chat-id", action="store_true", help="安全查询 Telegram 私聊 ID")
     argparse_modes.add_argument("--dry-run", action="store_true", help="只在终端预览")

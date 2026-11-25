@@ -1,4 +1,4 @@
-# Linux 服务器常驻部署
+# CiteGlance · Linux 服务器常驻部署
 
 [返回项目首页](../README.md)
 
@@ -19,34 +19,11 @@ Docker 版本在 Linux 云服务器上常驻运行。它使用 Semantic Scholar 
 3. 通过 Telegram 的 `@BotFather` 创建 Bot，向它发 `/start`。在客户端填写 Token 后点「获取私聊 ID」，或填入已有的 ID。Semantic Scholar Key 一栏留空时可以复用客户端保存的检索密钥。
 4. 点「部署或更新」。客户端通过 SSH 传输服务文件和当前频道，设置频率和用量上限，启动 Docker。完成后可用「查看云端状态」「查看云端日志」检查，再到 Telegram 发 `/status` 验证。
 
-之后要同步频道、修改频率或更新程序，再点「部署或更新」。部署使用同一个 Docker 项目及数据卷。服务可在 Windows 客户端关闭后独立运行。
+之后要同步频道、修改频率或更新程序，再点「部署或更新」。部署沿用 Docker 项目名 `paper-watch` 及原有数据卷。服务可在 Windows 客户端关闭后独立运行。
 
 ### 首次登录后如何检查
 
-- 如果终端显示 `用户名@服务器:~# Linux 服务器常驻部署
-
-[返回项目首页](../README.md)
-
-Docker 版本在 Linux 云服务器上常驻运行。它使用 Semantic Scholar 检索 `channels.json` 中的频道，把简报发到指定的 Telegram 私聊。这个服务通过 Telegram 长轮询接收命令，只需服务器能够向 Semantic Scholar 和 Telegram 发起 HTTPS 请求。
-
-| Telegram 指令 | 用途 |
-| --- | --- |
-| `/status` | 查看在线状态、下次预计检索、近期请求用量和上次结果 |
-| `/search` | 请求立即检索全部频道，完成后接收简报 |
-| `/help` | 查看指令说明 |
-
-## 从 Windows 客户端部署
-
-![客户端云端部署页，展示服务器连接、Bot 设置、部署和日志按钮。](images/cloud.png)
-
-1. 在云服务商控制台准备一台带 Python 3、Docker Engine 和 Docker Compose 的 Linux 服务器，并添加你的 SSH 公钥。SSH 用户需要有 Docker 权限。
-2. 打开客户端「云端部署」。填入 IP 或域名、SSH 用户及端口。若有指定的私钥文件，点「选择私钥」；使用默认密钥或已加载到 SSH Agent 的密钥时可留空。首次连接可点「首次 SSH 连接」，和服务器控制台核对指纹，确认后再点「检测服务器」。
-3. 通过 Telegram 的 `@BotFather` 创建 Bot，向它发 `/start`。在客户端填写 Token 后点「获取私聊 ID」，或填入已有的 ID。Semantic Scholar Key 一栏留空时可以复用客户端保存的检索密钥。
-4. 点「部署或更新」。客户端通过 SSH 传输服务文件和当前频道，设置频率和用量上限，启动 Docker。完成后可用「查看云端状态」「查看云端日志」检查，再到 Telegram 发 `/status` 验证。
-
-之后要同步频道、修改频率或更新程序，再点「部署或更新」。部署使用同一个 Docker 项目及数据卷。服务可在 Windows 客户端关闭后独立运行。
-
-，说明 SSH 已登录。在该终端运行 `whoami` 可以确认 Linux 用户名。把输出按原有大小写填入客户端的「SSH 用户」。
+- 如果终端显示 `用户名@服务器:~$`，说明 SSH 已登录。在该终端运行 `whoami` 可以确认 Linux 用户名。把输出按原有大小写填入客户端的「SSH 用户」。
 - 首次连接时出现 `用户名@服务器's password:`，说明用户名已经选定。输入该 Linux 账号的密码即可，终端会隐藏输入。如果提示 `Permission denied`，按 `Ctrl+C` 退出，核对云服务器控制台上的用户名和登录方式，再重新连接。
 - 「检测服务器」和「部署或更新」通过 SSH 密钥登录。如果目前可以用密码进入服务器，先把 Windows 上对应的 SSH **公钥**添加到这个 Linux 用户的 `~/.ssh/authorized_keys`。使用 Windows OpenSSH 按默认路径生成 Ed25519 密钥时，公钥文件是 `%USERPROFILE%\.ssh\id_ed25519.pub`。如果还没有 SSH 密钥，可以先在 Windows PowerShell 运行 `ssh-keygen -t ed25519` 生成一对，保留已有的密钥文件。添加公钥时保留原有内容，每把公钥单独一行。 [Windows OpenSSH 密钥文档](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_keymanagement)
 - 在已登录的 Linux 终端运行以下两条命令。第一条确认 Compose 是否已安装，第二条确认该 SSH 用户能否访问 Docker Engine。

@@ -1,10 +1,10 @@
-# Paper Watch · 论文追踪
+# CiteGlance · 文献雷达
 
-Paper Watch 是一个 Windows 学术论文追踪客户端。按研究主题设置检索频道，定时查找近期论文，在同一个窗口阅读摘要、核对关键词、收藏论文和保存译文。
+CiteGlance 是一个 Windows 学术论文追踪客户端。按研究主题设置检索频道，定时查找近期论文，在同一个窗口阅读摘要、核对关键词、收藏论文和保存译文。
 
 The Windows desktop app tracks new research papers across configurable search channels. It supports scheduled searches, local history and favorites, and on-demand abstract translation.
 
-![Paper Watch 的论文库。左侧显示按频道检索到的论文，右侧显示来源、命中的检索词和摘要。](docs/images/library.png)
+![CiteGlance 的论文库。左侧显示按频道检索到的论文，右侧显示来源、命中的检索词和摘要。](docs/images/library.png)
 
 *界面预览使用示例数据。*
 

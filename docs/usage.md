@@ -1,4 +1,4 @@
-# Paper Watch 使用与部署指南
+# CiteGlance 使用与部署指南
 
 [返回项目首页](../README.md)
 
@@ -76,7 +76,7 @@ python bot.py --chat-id
    | `TELEGRAM_BOT_TOKEN` | BotFather 发放的 Token |
    | `TELEGRAM_CHAT_ID` | 上一步取得的私聊 ID |
 
-3. 到 **Actions → 每日论文追踪 → Run workflow**。首次保持「仅检索并预览，不发送 Telegram」勾选，在运行日志看检索结果。这一步需要 Semantic Scholar API Key。
+3. 到 **Actions → CiteGlance 每日检索 → Run workflow**。首次保持「仅检索并预览，不发送 Telegram」勾选，在运行日志看检索结果。这一步需要 Semantic Scholar API Key。
 4. 确认结果后，可以手动取消预览勾选运行一次，验证 Telegram 能收到简报。要启用日程，在 **Settings → Secrets and variables → Actions → Variables** 添加仓库变量 `PAPER_WATCH_CLOUD_ENABLED`，值设为 `true`。启用后每天由 GitHub 运行。重复手动运行会产生额外 API 请求。
 
 云端密钥通过 GitHub Secrets 配置。桌面端可以使用 Windows 加密保存。云端工作流会把去重记录提交到仓库。个人使用时可在私有仓库中部署。

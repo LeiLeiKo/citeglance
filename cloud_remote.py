@@ -74,12 +74,12 @@ def execute(action, root):
     if action == "deploy":
         install_files(root, json.load(sys.stdin))
     if not (root / "compose.yaml").is_file():
-        raise ValueError("Paper Watch has not been deployed from the client on this host.")
+        raise ValueError("CiteGlance has not been deployed from the client on this host.")
     compose = [docker, "compose", "--project-name", "paper-watch"]
     if action == "deploy":
         run(compose + ["config", "--quiet"], root)
         run(compose + ["up", "-d", "--build", "--force-recreate"], root)
-        print("Paper Watch deployment submitted. Check container status and test /status in Telegram.")
+        print("CiteGlance deployment submitted. Check container status and test /status in Telegram.")
     if action in ("deploy", "status"):
         run(compose + ["ps", "-a"], root)
     if action == "logs":
@@ -94,5 +94,5 @@ if __name__ == "__main__":
         print(f"Docker command failed (exit {error.returncode}).", file=sys.stderr)
         sys.exit(1)
     except (ValueError, OSError, KeyError) as error:
-        print(f"Paper Watch: {error}", file=sys.stderr)
+        print(f"CiteGlance: {error}", file=sys.stderr)
         sys.exit(1)

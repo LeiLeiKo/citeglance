@@ -1,3 +1,5 @@
+name: paper-watch
+
 services:
   paper-watch:
     build: .

@@ -217,7 +217,7 @@ class AlwaysOn:
             scheduling = "自动检索已到期"
         current = " · 正在检索" if self.search_lock.locked() else ""
         outcome = self.store.get("last_result", "尚无记录")
-        return (f"论文追踪在线{current}\n{scheduling}\n"
+        return (f"{bot.APP_NAME} 在线{current}\n{scheduling}\n"
                 f"过去 24 小时的请求 · {used}/{self.settings.daily_budget}\n上次结果 · {outcome}")
 
     def update_offset(self):
@@ -242,7 +242,7 @@ class AlwaysOn:
                 continue
             command = (message.get("text") or "").strip().partition(" ")[0].partition("@")[0]
             if command in ("/start", "/help"):
-                self.send("论文追踪 Bot\n/status 查看状态和用量\n/search 立即检索全部频道")
+                self.send(f"{bot.APP_NAME} Bot\n/status 查看状态和用量\n/search 立即检索全部频道")
             elif command == "/status":
                 self.send(self.status())
             elif command == "/search":
@@ -297,7 +297,7 @@ def main():
         return 1
     for signum in (signal.SIGINT, signal.SIGTERM):
         signal.signal(signum, lambda *_: service.stop.set())
-    LOG.info("Paper Watch started: %s channels, interval %s minutes", len(channels), settings.interval_minutes)
+    LOG.info("%s started: %s channels, interval %s minutes", bot.APP_NAME, len(channels), settings.interval_minutes)
     service.run()
     return 0
 
