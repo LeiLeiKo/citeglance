@@ -10,12 +10,13 @@ import sqlite3
 from threading import Thread
 import time
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import filedialog, messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 from urllib.parse import quote, urlsplit
 import webbrowser
 
 import bot
+from cloud_deploy import DEFAULT_PROFILE, Target, load_deployment, open_ssh_window, private_chat_id, run_remote
 from desktop_store import (
     DATA_DIRECTORY, INTERVAL_SECONDS, Library, Secrets, clean_terms, read_json, saved_settings,
     translation_key, validate_channels, write_json,
@@ -106,6 +107,7 @@ class PaperWatch(tk.Tk):
         self.build_channels()
         self.build_settings()
         self.build_schedule()
+        self.build_cloud_deploy()
         footer = ttk.Frame(self, padding=(22, 1, 22, 12))
         footer.pack(side="bottom", fill="x")
         self.progress_bar = ttk.Progressbar(footer, mode="indeterminate", length=100)
@@ -432,6 +434,150 @@ class PaperWatch(tk.Tk):
         ttk.Label(details, textvariable=self.schedule_status, style="Heading.TLabel", wraplength=350,
                   justify="left").pack(anchor="w", pady=(0, 8))
         ttk.Label(details, textvariable=self.schedule_last, style="Hint.TLabel", wraplength=350).pack(anchor="w")
+
+    def build_cloud_deploy(self):
+        tab = self.add_tab("云端部署")
+        tab.columnconfigure(0, weight=1, uniform="cloud")
+        tab.columnconfigure(1, weight=1, uniform="cloud")
+        tab.rowconfigure(2, weight=1)
+        ssh_panel = ttk.Frame(tab, padding=(4, 0, 12, 0))
+        bot_panel = ttk.Frame(tab, padding=(12, 0, 4, 0))
+        ssh_panel.grid(row=0, column=0, sticky="new")
+        bot_panel.grid(row=0, column=1, sticky="new")
+        profile = {**DEFAULT_PROFILE, **self.settings.get("cloud", {})}
+        self.cloud_values = {name: tk.StringVar(value=value) for name, value in profile.items()}
+        self.cloud_token = tk.StringVar()
+        self.cloud_scholar = tk.StringVar()
+        self.cloud_remember = tk.BooleanVar(value=os.name == "nt")
+        self.cloud_buttons = []
+
+        self.label(ssh_panel, "服务器连接", style="Heading.TLabel").pack(anchor="w", pady=(0, 5))
+        for key, caption in (("host", "服务器 IP 或域名"), ("user", "SSH 用户"),
+                             ("port", "SSH 端口"), ("identity", "SSH 私钥文件（可选）")):
+            self.setting_row(ssh_panel, caption, self.cloud_values[key])
+        ssh_buttons = ttk.Frame(ssh_panel)
+        ssh_buttons.pack(fill="x", pady=(4, 3))
+        self.cloud_button(ssh_buttons, "选择私钥", self.pick_cloud_identity).pack(side="left", padx=(0, 6))
+        self.cloud_button(ssh_buttons, "首次 SSH 连接", self.begin_cloud_ssh).pack(side="left")
+        self.label(ssh_panel, "使用已安装 Docker Compose 的 Linux 服务器。首次连接时，请与服务器提供商的记录核对 SSH 指纹。",
+                   style="Hint.TLabel", wraplength=365, justify="left").pack(anchor="w", pady=(4, 0))
+
+        self.label(bot_panel, "Telegram 与检索", style="Heading.TLabel").pack(anchor="w", pady=(0, 5))
+        self.setting_row(bot_panel, "Telegram Bot Token", self.cloud_token, secret=True)
+        self.setting_row(bot_panel, "Telegram 私聊 ID", self.cloud_values["chat_id"])
+        self.setting_row(bot_panel, "Semantic Scholar API Key", self.cloud_scholar, secret=True)
+        self.setting_row(bot_panel, "云端间隔（分钟）", self.cloud_values["minutes"])
+        self.setting_row(bot_panel, "云端请求上限／24 小时", self.cloud_values["budget"])
+        self.checkbutton(bot_panel, "记住云端密钥（Windows 加密）", variable=self.cloud_remember).pack(anchor="w")
+        self.label(bot_panel, "检索 Key 留空可用客户端已保存的 Semantic Scholar Key。首次部署前，先在 Telegram 给 Bot 发 /start。",
+                   style="Hint.TLabel", wraplength=365, justify="left").pack(anchor="w", pady=(3, 0))
+
+        toolbar = ttk.Frame(tab, padding=(4, 7, 4, 6))
+        toolbar.grid(row=1, column=0, columnspan=2, sticky="ew")
+        for action, caption in (("check", "检测服务器"), ("deploy", "部署或更新"),
+                                ("status", "查看云端状态"), ("logs", "查看云端日志")):
+            self.cloud_button(toolbar, caption, lambda action=action: self.cloud_action(action),
+                              primary=action == "deploy").pack(side="left", padx=(0, 6))
+        self.cloud_button(toolbar, "获取私聊 ID", self.get_cloud_chat).pack(side="left")
+        self.cloud_log = self.new_text(tab, height=5)
+        self.cloud_log.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=4)
+        self.set_cloud_log("")
+
+    def cloud_button(self, parent, caption, command, *, primary=False):
+        button = self.button(parent, caption, style="Primary.TButton" if primary else "Compact.TButton",
+                             command=command)
+        self.cloud_buttons.append(button)
+        return button
+
+    def set_cloud_log(self, value):
+        self.cloud_log.configure(state="normal")
+        self.cloud_log.delete("1.0", "end")
+        self.cloud_log.insert("1.0", value)
+        self.cloud_log.configure(state="disabled")
+
+    def cloud_fields(self):
+        return {key: value.get().strip() for key, value in self.cloud_values.items()}
+
+    def pick_cloud_identity(self):
+        selected = filedialog.askopenfilename(parent=self, title=self.t("选择 SSH 私钥文件"))
+        if selected:
+            self.cloud_values["identity"].set(selected)
+
+    def begin_cloud_ssh(self):
+        try:
+            open_ssh_window(Target.from_fields(self.cloud_fields()))
+        except (ValueError, OSError) as error:
+            self.show_error("无法打开 SSH", error)
+
+    def cloud_slot(self, target, service):
+        return self.key_slot("cloud", service, target.identity_slot)
+
+    def get_cloud_chat(self):
+        if self.busy:
+            return
+        try:
+            token = self.cloud_token.get().strip()
+            if not token and self.cloud_values["host"].get().strip():
+                target = Target.from_fields(self.cloud_fields())
+                token = self.secrets.get(self.cloud_slot(target, "Telegram"))
+            if not token:
+                raise ValueError("请填写有效的 Telegram Bot Token。")
+        except (ValueError, OSError) as error:
+            self.show_error("无法获取私聊 ID", error)
+            return
+
+        def show(chat_id):
+            self.cloud_values["chat_id"].set(str(chat_id))
+            self.set_status("已填写 Telegram 私聊 ID。")
+            self.render_detail()
+
+        self.run_task("正在读取 Telegram 私聊 ID……", lambda: private_chat_id(token), show)
+
+    def cloud_action(self, action):
+        if self.busy:
+            return
+        try:
+            fields = self.cloud_fields()
+            target = Target.from_fields(fields)
+            payload = None
+            if action == "deploy":
+                token = self.cloud_token.get().strip() or self.secrets.get(self.cloud_slot(target, "Telegram"))
+                key = self.cloud_scholar.get().strip() or self.secrets.get(self.cloud_slot(target, "Semantic Scholar"))
+                if not key:
+                    key = self.secrets.get(self.key_slot("search", "Semantic Scholar"),
+                                           os.getenv("SEMANTIC_SCHOLAR_API_KEY", ""))
+                payload = load_deployment(bot.ROOT, self.config_data, token, key, fields)
+            fresh = {**self.settings, "cloud": fields}
+            write_json(self.directory / "settings.json", fresh)
+            self.settings = fresh
+        except (ValueError, OSError) as error:
+            self.show_error("无法执行云端操作", error)
+            return
+        self.set_cloud_log(self.t("正在连接服务器，请稍候……"))
+        remember = self.cloud_remember.get()
+        token_draft = self.cloud_token.get().strip()
+        key_draft = self.cloud_scholar.get().strip()
+
+        def show(result):
+            ok, output = result
+            if ok and action == "deploy":
+                self.set_status("已提交云端部署。请在 Telegram 发送 /status 验证。")
+                try:
+                    for service, value in (("Telegram", token_draft), ("Semantic Scholar", key_draft)):
+                        if value:
+                            self.secrets.update(self.cloud_slot(target, service), value, remember=remember, clear=False)
+                except (ValueError, OSError) as error:
+                    output += "\n" + self.error(error)
+                else:
+                    self.cloud_token.set("")
+                    self.cloud_scholar.set("")
+            else:
+                self.set_status("云端操作已完成。" if ok else "云端操作失败，请查看日志。")
+            self.set_cloud_log(output)
+            self.render_detail()
+
+        self.run_task("正在连接服务器，请稍候……", lambda: run_remote(bot.ROOT, target, action, payload),
+                      show, show_failure=self.set_cloud_log)
 
     def interval_seconds(self):
         return self.settings["auto_interval"] * INTERVAL_SECONDS[self.settings["auto_unit"]]
@@ -932,10 +1078,12 @@ class PaperWatch(tk.Tk):
 
         self.run_task("正在使用 {provider} 翻译摘要……", fetch, show, provider=provider)
 
-    def run_task(self, caption, operation, callback, *, automatic=False, **fields):
+    def run_task(self, caption, operation, callback, *, automatic=False, show_failure=None, **fields):
         self.busy = True
         self.auto_running = automatic
         self.search_button.configure(state="disabled")
+        for button in self.cloud_buttons:
+            button.configure(state="disabled")
         self.progress_bar.start(15)
         self.set_status(caption, **fields)
         self.refresh_schedule_status()
@@ -943,18 +1091,18 @@ class PaperWatch(tk.Tk):
 
         def worker():
             try:
-                self.events.put((callback, operation(), None, automatic))
+                self.events.put((callback, operation(), None, automatic, show_failure))
             except (OSError, ValueError, bot.ServiceError) as error:
-                self.events.put((callback, None, error, automatic))
+                self.events.put((callback, None, error, automatic, show_failure))
             except Exception as error:
-                self.events.put((callback, None, f"操作中断（{type(error).__name__}）", automatic))
+                self.events.put((callback, None, f"操作中断（{type(error).__name__}）", automatic, show_failure))
 
         Thread(target=worker, daemon=True).start()
 
     def process_events(self):
         self.poll_timer = None
         try:
-            callback, result, error, automatic = self.events.get_nowait()
+            callback, result, error, automatic, show_failure = self.events.get_nowait()
         except Empty:
             pass
         else:
@@ -962,12 +1110,16 @@ class PaperWatch(tk.Tk):
             self.auto_running = False
             self.progress_bar.stop()
             self.search_button.configure(state="normal")
+            for button in self.cloud_buttons:
+                button.configure(state="normal")
             if error:
                 if automatic:
                     self.set_status("自动检索未完成（{reason}）", reason=error)
                 else:
                     self.set_status(error)
                 self.render_detail()
+                if show_failure:
+                    show_failure(self.error(error))
                 if not automatic:
                     self.show_error("操作未完成", error)
             else:

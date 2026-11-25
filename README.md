@@ -17,7 +17,7 @@ The Windows desktop app tracks new research papers across configurable search ch
 | 本地论文库 | 查看标题、作者、发表日期、来源关键词、学科分类和摘要。检索结果自动去重，可收藏并查看历史。 |
 | 摘要翻译 | 通过 DeepL、OpenAI 兼容服务或 LibreTranslate 翻译摘要，可选简体中文、日语和英语。已有译文保存在本机。 |
 | 三语界面 | 简体中文、English、日本語可即时切换，选择会记住。 |
-| 可选云端运行 | 可用 Docker 在 Linux 服务器常驻，从 Telegram 随时查询状态或触发检索，也可用 GitHub Actions 定时发送简报。 |
+| 可选云端运行 | 在「云端部署」页检测服务器、通过 SSH 部署或更新 Docker 服务，并查看运行状态和日志。部署后可在 Telegram 随时查询状态或触发检索。 |
 
 ## 快速开始
 
