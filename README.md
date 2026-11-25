@@ -19,7 +19,7 @@ The Windows desktop app supports Semantic Scholar, OpenAlex, Crossref, and confi
 | 本地论文库 | 查看标题、作者、发表日期、来源关键词、学科分类和摘要。检索结果自动去重，可收藏并查看历史。 |
 | 摘要翻译 | 通过 DeepL、OpenAI 兼容服务或 LibreTranslate 翻译摘要，可选简体中文、日语和英语。已有译文保存在本机。 |
 | 三语界面 | 简体中文、English、日本語可即时切换，选择会记住。 |
-| 可选云端运行 | 在「云端部署」页检测服务器、通过 SSH 部署或更新 Docker 服务，并查看运行状态和日志。部署后可在 Telegram 随时查询状态或触发检索。 |
+| 可选云端运行 | 在「云端部署」页设置每日固定检索时间或检索间隔，通过 SSH 部署或更新 Docker 服务。部署后可在 Telegram 查询状态或立即检索。 |
 
 ## 快速开始
 
@@ -44,7 +44,7 @@ The Windows desktop app supports Semantic Scholar, OpenAlex, Crossref, and confi
 | --- | --- | --- |
 | Windows 客户端 | Semantic Scholar、OpenAlex、Crossref、自定义 JSON API | 手动检索，或在客户端打开且设备唤醒时定时检索 |
 | 命令行 `bot.py` | Semantic Scholar | 手动运行，终端预览或推送 Telegram 简报 |
-| Docker 常驻服务 | Semantic Scholar | Linux 服务器定时推送 Telegram 简报，支持 `/status` 和 `/search` |
+| Docker 常驻服务 | Semantic Scholar | Linux 服务器按每日固定时间（JST）或间隔推送 Telegram 简报，支持 `/status` 和 `/search` |
 | GitHub Actions | Semantic Scholar | 通过仓库 Secrets 配置密钥，启用后默认每天日本时间 09:07 检索前一自然日并推送 Telegram 简报 |
 
 [使用指南、API 配置与 GitHub Actions 部署](docs/usage.md) · [Linux 服务器常驻部署](docs/server.md)

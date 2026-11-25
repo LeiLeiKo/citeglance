@@ -92,7 +92,12 @@ TEXT = {
     ),
     "Telegram 私聊 ID": ("Telegram private chat ID", "Telegramの個別チャットID"),
     "Telegram 与检索": ("Telegram and search", "Telegramと検索"),
+    "每天检索时间（JST）": ("Daily search time (JST)", "毎日の検索時刻（JST）"),
     "云端间隔（分钟）": ("Cloud interval (minutes)", "クラウド検索間隔（分）"),
+    "输入 HH:MM（如 09:30）。留空时按间隔检索。": (
+        "Enter HH:MM (for example, 09:30). Leave blank to use the interval.",
+        "HH:MM形式（例：09:30）で入力します。空欄の場合は検索間隔を使います。",
+    ),
     "云端请求上限／24 小时": ("Requests per 24 hours", "24時間のリクエスト上限"),
     "记住云端密钥（Windows 加密）": ("Remember cloud keys (Windows encryption)", "クラウド用キーを保存（Windowsで暗号化）"),
     "检索 Key 留空可用客户端已保存的 Semantic Scholar Key。首次部署前，先在 Telegram 给 Bot 发 /start。": (
@@ -133,6 +138,10 @@ TEXT = {
         "Semantic ScholarのAPIキーを入力するか、クライアントの設定で保存してください。",
     ),
     "请输入数字格式的 Telegram 私聊 ID。": ("Enter the numeric Telegram chat ID.", "Telegramの数値チャットIDを入力してください。"),
+    "请输入 24 小时制的检索时间，格式为 HH:MM（如 09:30）。": (
+        "Enter a 24-hour search time in HH:MM format, such as 09:30.",
+        "検索時刻は24時間制のHH:MM形式（例：09:30）で入力してください。",
+    ),
     "检索间隔需为 1–525600 分钟。": ("Enter a search interval from 1 to 525600 minutes.", "検索間隔は1〜525600分で入力してください。"),
     "每日请求上限需为 1–10000 的整数。": ("Enter a request limit from 1 to 10000.", "リクエスト上限は1〜10000で入力してください。"),
     "请配置至少一个频道，并让每日及每轮额度覆盖全部频道。": (

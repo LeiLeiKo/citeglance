@@ -465,11 +465,21 @@ class PaperWatch(tk.Tk):
                    style="Hint.TLabel", wraplength=365, justify="left").pack(anchor="w", pady=(4, 0))
 
         self.label(bot_panel, "Telegram 与检索", style="Heading.TLabel").pack(anchor="w", pady=(0, 5))
-        self.setting_row(bot_panel, "Telegram Bot Token", self.cloud_token, secret=True)
-        self.setting_row(bot_panel, "Telegram 私聊 ID", self.cloud_values["chat_id"])
-        self.setting_row(bot_panel, "Semantic Scholar API Key", self.cloud_scholar, secret=True)
-        self.setting_row(bot_panel, "云端间隔（分钟）", self.cloud_values["minutes"])
-        self.setting_row(bot_panel, "云端请求上限／24 小时", self.cloud_values["budget"])
+        self.setting_row(bot_panel, "Telegram Bot Token", self.cloud_token, secret=True, row_padding=2)
+        self.setting_row(bot_panel, "Telegram 私聊 ID", self.cloud_values["chat_id"], row_padding=2)
+        self.setting_row(bot_panel, "Semantic Scholar API Key", self.cloud_scholar, secret=True, row_padding=2)
+        daily_time = self.cloud_values["daily_time"]
+        self.setting_row(bot_panel, "每天检索时间（JST）", daily_time, row_padding=2)
+        interval_entry = self.setting_row(bot_panel, "云端间隔（分钟）", self.cloud_values["minutes"], row_padding=2)
+
+        def update_cloud_interval(*_):
+            interval_entry.configure(state="disabled" if daily_time.get().strip() else "normal")
+
+        daily_time.trace_add("write", update_cloud_interval)
+        update_cloud_interval()
+        self.label(bot_panel, "输入 HH:MM（如 09:30）。留空时按间隔检索。",
+                   style="Hint.TLabel", wraplength=365, justify="left").pack(anchor="w", pady=(1, 4))
+        self.setting_row(bot_panel, "云端请求上限／24 小时", self.cloud_values["budget"], row_padding=2)
         self.checkbutton(bot_panel, "记住云端密钥（Windows 加密）", variable=self.cloud_remember).pack(anchor="w")
         self.label(bot_panel, "检索 Key 留空可用客户端已保存的 Semantic Scholar Key。首次部署前，先在 Telegram 给 Bot 发 /start。",
                    style="Hint.TLabel", wraplength=365, justify="left").pack(anchor="w", pady=(3, 0))
@@ -657,9 +667,9 @@ class PaperWatch(tk.Tk):
         self.schedule_last.set("" if self.last_round is None else
                                self.t("上次检索启动 · {when}", when=self.schedule_time(self.last_round)))
 
-    def setting_row(self, parent, text, variable, *, choices=None, secret=False):
+    def setting_row(self, parent, text, variable, *, choices=None, secret=False, row_padding=4):
         row = ttk.Frame(parent)
-        row.pack(fill="x", pady=4)
+        row.pack(fill="x", pady=row_padding)
         self.label(row, text, width=25).pack(side="left")
         if choices:
             widget = ttk.Combobox(row, state="readonly")

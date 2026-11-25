@@ -17,7 +17,7 @@ FILES = ("Dockerfile", ".dockerignore", "compose.yaml", "server.py", "bot.py")
 ACTIONS = ("check", "deploy", "status", "logs")
 DEFAULT_PROFILE = {
     "host": "", "user": "ubuntu", "port": 22, "identity": "", "chat_id": "",
-    "minutes": 1440, "budget": 20,
+    "minutes": 1440, "daily_time": "", "budget": 20,
 }
 
 
@@ -99,7 +99,12 @@ def load_deployment(root, channels, telegram_token, scholar_key, fields):
     if not key or any(char.isspace() or ord(char) < 32 for char in key):
         raise ValueError("请填写 Semantic Scholar API Key，或先在客户端保存该密钥。")
     chat = checked_int(fields["chat_id"], 1, 2**53 - 1, "请输入数字格式的 Telegram 私聊 ID。")
-    minutes = checked_int(fields["minutes"], 1, 525600, "检索间隔需为 1–525600 分钟。")
+    daily_time = fields.get("daily_time", "").strip()
+    if daily_time and not bot.valid_daily_time(daily_time):
+        raise ValueError("请输入 24 小时制的检索时间，格式为 HH:MM（如 09:30）。")
+    minutes = DEFAULT_PROFILE["minutes"]
+    if not daily_time:
+        minutes = checked_int(fields["minutes"], 1, 525600, "检索间隔需为 1–525600 分钟。")
     budget = checked_int(fields["budget"], 1, 10000, "每日请求上限需为 1–10000 的整数。")
     channel_count = len(channels["channels"])
     if not 1 <= channel_count <= min(budget, bot.REQUEST_BUDGET):
@@ -111,6 +116,7 @@ def load_deployment(root, channels, telegram_token, scholar_key, fields):
     env = {
         "TELEGRAM_CHAT_ID": chat,
         "PAPER_WATCH_INTERVAL_MINUTES": minutes,
+        "PAPER_WATCH_DAILY_TIME": daily_time,
         "PAPER_WATCH_DAILY_BUDGET": budget,
         "PAPER_WATCH_RUN_BUDGET": bot.REQUEST_BUDGET,
     }

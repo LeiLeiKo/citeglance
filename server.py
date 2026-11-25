@@ -2,7 +2,7 @@
 
 from contextlib import closing
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import logging
 import os
@@ -49,12 +49,16 @@ class Settings:
     daily_budget: int
     run_budget: int
     lookback_days: int
+    daily_time: str = ""
 
     @classmethod
     def from_env(cls):
         token = setting_secret("TELEGRAM_BOT_TOKEN")
         if not re.fullmatch(r"[0-9]+:[A-Za-z0-9_-]+", token):
             raise ValueError("TELEGRAM_BOT_TOKEN has an invalid format")
+        daily_time = os.environ.get("PAPER_WATCH_DAILY_TIME", "").strip()
+        if daily_time and not bot.valid_daily_time(daily_time):
+            raise ValueError("PAPER_WATCH_DAILY_TIME must be HH:MM in Japan Standard Time")
         return cls(
             setting_secret("SEMANTIC_SCHOLAR_API_KEY"), token,
             setting_int("TELEGRAM_CHAT_ID", 0, 1, 2**53 - 1),
@@ -62,6 +66,7 @@ class Settings:
             setting_int("PAPER_WATCH_DAILY_BUDGET", 20, 1, 10000),
             setting_int("PAPER_WATCH_RUN_BUDGET", 20, 1, 200),
             setting_int("PAPER_WATCH_LOOKBACK_DAYS", 14, 1, 365),
+            daily_time,
         )
 
 
@@ -89,6 +94,11 @@ class Store:
     def put(self, key, value):
         with closing(self.connect()) as con:
             con.execute("INSERT OR REPLACE INTO state(key,value) VALUES(?,?)", (key, json.dumps(value)))
+
+    def record_daily_start(self, started, schedule):
+        with closing(self.connect()) as con:
+            con.execute("INSERT OR REPLACE INTO state(key,value) VALUES(?,?), (?,?)",
+                        ("last_started", json.dumps(started), "daily_schedule", json.dumps(schedule)))
 
     def usage(self, now):
         with closing(self.connect()) as con:
@@ -123,6 +133,16 @@ class AlwaysOn:
         self.stop = Event()
         self.search_lock = Lock()
         self.worker = None
+        self.daily_due = None
+        saved_schedule = self.store.get("daily_schedule", {})
+        if settings.daily_time:
+            if saved_schedule.get("time") == settings.daily_time:
+                self.daily_due = saved_schedule["due"]
+            else:
+                self.daily_due = self.daily_due_after(time.time())
+                self.store.put("daily_schedule", self.daily_schedule(self.daily_due))
+        elif saved_schedule:
+            self.store.put("daily_schedule", {})
 
     def telegram_request(self, method, **params):
         return self.telegram(self.settings.token, method, **params)
@@ -131,7 +151,20 @@ class AlwaysOn:
         return self.telegram_request("sendMessage", chat_id=self.settings.chat_id, text=message,
                                      link_preview_options={"is_disabled": True})
 
+    def daily_due_after(self, now):
+        local = datetime.fromtimestamp(now, bot.JAPAN_TIME)
+        hour, minute = map(int, self.settings.daily_time.split(":"))
+        due = local.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        if due <= local:
+            due += timedelta(days=1)
+        return due.timestamp()
+
+    def daily_schedule(self, due):
+        return {"time": self.settings.daily_time, "due": due}
+
     def next_due(self):
+        if self.daily_due is not None:
+            return self.daily_due
         last = self.store.get("last_started")
         return 0 if last is None else last + self.settings.interval_minutes * 60
 
@@ -152,7 +185,12 @@ class AlwaysOn:
             budget = min(self.settings.run_budget, self.budget_remaining(now))
             if budget < len(self.channels):
                 return "quota"
-            self.store.put("last_started", now)
+            if automatic and self.daily_due is not None:
+                due = self.daily_due_after(now)
+                self.store.record_daily_start(now, self.daily_schedule(due))
+                self.daily_due = due
+            else:
+                self.store.put("last_started", now)
             self.worker = Thread(target=self.finish_round, args=(budget,), daemon=True)
             self.worker.start()
             started = True
@@ -209,15 +247,17 @@ class AlwaysOn:
         now = time.time()
         due = self.next_due()
         used, oldest, _ = self.store.usage(now)
-        if self.settings.daily_budget - used < len(self.channels) and oldest is not None:
-            scheduling = "等待过去 24 小时的请求额度恢复"
-        elif due > now:
+        if due > now:
             scheduling = f"下次自动检索约 {datetime.fromtimestamp(due, bot.JAPAN_TIME):%Y-%m-%d %H:%M JST}"
+        elif self.settings.daily_budget - used < len(self.channels) and oldest is not None:
+            scheduling = "等待过去 24 小时的请求额度恢复"
         else:
             scheduling = "自动检索已到期"
         current = " · 正在检索" if self.search_lock.locked() else ""
         outcome = self.store.get("last_result", "尚无记录")
-        return (f"{bot.APP_NAME} 在线{current}\n{scheduling}\n"
+        rule = (f"每天 {self.settings.daily_time} JST" if self.settings.daily_time
+                else f"每 {self.settings.interval_minutes} 分钟")
+        return (f"{bot.APP_NAME} 在线{current}\n自动检索计划 · {rule}\n{scheduling}\n"
                 f"过去 24 小时的请求 · {used}/{self.settings.daily_budget}\n上次结果 · {outcome}")
 
     def update_offset(self):
@@ -297,7 +337,8 @@ def main():
         return 1
     for signum in (signal.SIGINT, signal.SIGTERM):
         signal.signal(signum, lambda *_: service.stop.set())
-    LOG.info("%s started: %s channels, interval %s minutes", bot.APP_NAME, len(channels), settings.interval_minutes)
+    schedule = f"daily at {settings.daily_time} JST" if settings.daily_time else f"every {settings.interval_minutes} minutes"
+    LOG.info("%s started: %s channels, search %s", bot.APP_NAME, len(channels), schedule)
     service.run()
     return 0
 

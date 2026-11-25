@@ -24,7 +24,7 @@
 
 ![定时检索页，显示间隔设置、上次检索启动时间与下次预计时间。](images/schedule.png)
 
-需要关机后仍能定时检索时，可部署文末的 GitHub 工作流。
+需要关机后仍能定时检索时，可在「云端部署」页设置每日固定时间或间隔，部署到 Linux 云服务器。也可以使用下文的 GitHub 工作流。 [Linux 云端部署指南](server.md)
 
 ### 配置检索服务和密钥
 
@@ -90,6 +90,8 @@ python bot.py --chat-id
 3. 到 **Actions → CiteGlance 每日检索 → Run workflow**。首次保持「仅检索并预览，不发送 Telegram」勾选，在运行日志看检索结果。这一步需要 Semantic Scholar API Key。
 4. 确认结果后，可以手动取消预览勾选运行一次，验证 Telegram 能收到简报。要启用日程，在 **Settings → Secrets and variables → Actions → Variables** 添加仓库变量 `PAPER_WATCH_CLOUD_ENABLED`，值设为 `true`。启用后每天由 GitHub 运行。重复手动运行会产生额外 API 请求。
 
+要修改 GitHub Actions 的检索时间，在你的仓库默认分支编辑 `.github/workflows/paper-watch.yml` 的 `on.schedule`。Cron 前两项依次是分钟、小时。保留 `timezone: 'Asia/Tokyo'`，例如把 `cron` 改为 `'30 9 * * *'`，即每天日本时间 09:30。
+
 云端密钥通过 GitHub Secrets 配置。桌面端可以使用 Windows 加密保存。命令行推送的历史保存在运行目录的 `state.json`，桌面端和 Docker 服务使用各自的 SQLite 数据库。GitHub Actions 只有仓库读取权限，每轮独立运行。同一天重复运行可能收到相同的论文，较晚收录的论文也可能超出检索范围。
 
 ## 检索和简报
@@ -99,6 +101,6 @@ python bot.py --chat-id
 - 同一篇论文通过 DOI、Semantic Scholar ID、arXiv ID 或规范化标题去重。跨频道结果合成一条。标题相同的预印本和正式版在同一轮出现时优先采用正式版。
 - 简报包含论文标题、出版日期、渠道、匹配词组和 DOI 或 Semantic Scholar 链接。结果按频道分组，再按发表日期排序。
 - 命令行常规推送和 Docker 服务在 Telegram 确认收到消息后保存论文记录。若接收消息后、保存状态前运行中断，下一次可能重复推送这一批。若某个频道的检索未完成，简报会标明，GitHub 运行状态也会显示失败。
-- 可在 `.github/workflows/paper-watch.yml` 修改定时。默认 20 次是**每轮**预算，改为每小时运行前请重新核算预计的每日请求量。
+- GitHub Actions 默认 20 次是**每轮**预算，提高运行频率前请重新核算每日请求量。
 
 参考：[Semantic Scholar API](https://api.semanticscholar.org/api-docs) · [Telegram Bot API](https://core.telegram.org/bots/api) · [GitHub Actions 定时工作流](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onschedule)

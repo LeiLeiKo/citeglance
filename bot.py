@@ -24,6 +24,10 @@ APP_TITLE = "CiteGlance · 文献雷达"
 JAPAN_TIME = timezone(timedelta(hours=9))
 
 
+def valid_daily_time(value):
+    return re.fullmatch(r"(?:[01][0-9]|2[0-3]):[0-5][0-9]", value) is not None
+
+
 class ServiceError(Exception):
     def __init__(self, label, status=None, retry_after=""):
         super().__init__(label)

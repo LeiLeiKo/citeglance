@@ -3,6 +3,7 @@
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -34,8 +35,13 @@ def install_files(root, content):
     env = content["env"]
     secrets = {"semantic_scholar_api_key": content["scholar"], "telegram_bot_token": content["token"]}
     channels = content["channels"]
-    if set(files) != FILES or set(env) != ENV_NAMES or any(type(v) is not int or v < 1 for v in env.values()):
+    daily_time_name = "PAPER_WATCH_DAILY_TIME"
+    daily_time = env.get(daily_time_name, "")
+    if (set(files) != FILES or set(env) - {daily_time_name} != ENV_NAMES
+            or any(type(env[key]) is not int or env[key] < 1 for key in ENV_NAMES)):
         raise ValueError("Invalid deployment payload")
+    if not isinstance(daily_time, str) or (daily_time and not re.fullmatch(r"(?:[01][0-9]|2[0-3]):[0-5][0-9]", daily_time)):
+        raise ValueError("Invalid daily search time")
     if not all(isinstance(value, str) and value and len(value) < 500000 for value in files.values()):
         raise ValueError("Invalid deployment files")
     if not isinstance(channels, dict) or not channels.get("channels"):
