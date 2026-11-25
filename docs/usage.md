@@ -42,11 +42,13 @@
 | OpenAI 兼容 | 完整 `/chat/completions` 地址、平台的模型名，以及服务要求的 API Key。本机运行的兼容服务也可配置 |
 | LibreTranslate | 完整 `/translate` 地址。本机运行时可用默认的 `http://127.0.0.1:5000/translate`，所选语言需已安装。密钥取决于服务配置 |
 
-Semantic Scholar 是检索服务。点击翻译时，客户端只把当前摘要发送给所选翻译服务。选择本机翻译服务可以在本地完成这一步。客户端自身不包含翻译模型。
+点击翻译时，客户端只把当前摘要发送给所选翻译服务。选择本机翻译服务可以在本地完成这一步。客户端自身不包含翻译模型。
 
 ### 检索 API
 
-客户端内置 Semantic Scholar、OpenAlex 和 Crossref。Crossref 可用公开接口，按 A 组词获取候选并在客户端筛选，覆盖受候选结果与摘要可用性影响。OpenAlex 无密钥模式仅查第一页，接口可能限流。各来源对搜索语法、结果量、摘要和关键词的覆盖存在差异。
+客户端内置 Semantic Scholar、OpenAlex 和 Crossref，同时支持自定义 JSON API。手动和定时检索均使用「API 与设置」中保存的来源。命令行 `bot.py`、Docker 常驻服务和随仓库附带的 GitHub Actions 目前仅支持 Semantic Scholar。
+
+Crossref 可用公开接口，按 A 组词获取候选并在客户端筛选，覆盖受候选结果与摘要可用性影响。OpenAlex 无密钥时客户端只尝试查第一页。各来源的搜索语法、结果量、摘要和关键词覆盖有所不同。
 
 对于其他返回 JSON 的 HTTP API，选「自定义 JSON」并编辑配置框。界面自带示例，按目标 API 文档调整这些字段：
 

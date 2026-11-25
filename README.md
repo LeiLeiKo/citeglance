@@ -2,7 +2,9 @@
 
 CiteGlance 是一个 Windows 学术论文追踪客户端。你可以为任何研究主题建立检索频道，定时查找近期论文，在同一个窗口阅读摘要、核对关键词、收藏论文和保存译文。
 
-The Windows desktop app tracks new research papers across configurable search channels. It supports scheduled searches, local history and favorites, and on-demand abstract translation.
+**Windows 客户端支持 Semantic Scholar、OpenAlex、Crossref 和自定义 JSON API。** 手动和定时检索都使用你在「API 与设置」选择的来源。仓库附带的命令行、Docker 常驻服务和 GitHub Actions 目前仅支持 Semantic Scholar。
+
+The Windows desktop app supports Semantic Scholar, OpenAlex, Crossref, and configurable JSON APIs for manual and scheduled searches. The bundled CLI, Docker service, and GitHub Actions workflow currently support Semantic Scholar only.
 
 ![CiteGlance 的论文库。左侧显示按频道检索到的论文，右侧显示来源、命中的检索词和摘要。](docs/images/library.png)
 
@@ -27,10 +29,10 @@ The Windows desktop app tracks new research papers across configurable search ch
 4. 在「API 与设置」选择检索来源。需要认证时，填入该服务发给你的 API Key 并保存。想先试用，可以选择无需 API Key 的 Crossref。
 5. 回到「论文库」，选择频道并点击「检索新论文」。自动检索间隔可在「定时检索」调整。
 
-## 支持的检索服务
+## 桌面客户端的检索来源
 
 - **Semantic Scholar** 是桌面端默认选中的第三方检索服务，支持论文检索、摘要和学科分类。使用时需填写你自己申请的 API Key。
-- **OpenAlex** 提供论文元数据和索引关键词。API Key 用于持续使用及翻页。
+- **OpenAlex** 提供论文元数据和索引关键词。配置 API Key 后，客户端可继续翻查后续结果。
 - **Crossref** 支持无需密钥的公开检索。摘要由元数据提供方提交，覆盖因论文而异。
 - **自定义 JSON** 支持常见 REST API 的 GET／POST、密钥认证、字段映射及游标分页。接口可用的检索语法及元数据范围取决于服务。
 
@@ -38,10 +40,11 @@ The Windows desktop app tracks new research papers across configurable search ch
 
 ## 本地运行与云端部署
 
-| 方式 | 运行条件 | 结果 |
+| 方式 | 支持的检索来源 | 运行方式 |
 | --- | --- | --- |
-| Windows 客户端 | 客户端打开且设备处于唤醒状态，支持最小化 | 本地历史、收藏与译文 |
-| Docker 常驻服务 | Linux 服务器保持在线，由 Docker 管理进程 | Telegram 简报，以及 `/status` 和 `/search` 指令 |
-| GitHub Actions | 通过仓库 Secrets 配置 Semantic Scholar 和 Telegram，默认每天日本时间 09:07 检索前一自然日 | Telegram 简报 |
+| Windows 客户端 | Semantic Scholar、OpenAlex、Crossref、自定义 JSON API | 手动检索，或在客户端打开且设备唤醒时定时检索 |
+| 命令行 `bot.py` | Semantic Scholar | 手动运行，终端预览或推送 Telegram 简报 |
+| Docker 常驻服务 | Semantic Scholar | Linux 服务器定时推送 Telegram 简报，支持 `/status` 和 `/search` |
+| GitHub Actions | Semantic Scholar | 通过仓库 Secrets 配置密钥，启用后默认每天日本时间 09:07 检索前一自然日并推送 Telegram 简报 |
 
 [使用指南、API 配置与 GitHub Actions 部署](docs/usage.md) · [Linux 服务器常驻部署](docs/server.md)
