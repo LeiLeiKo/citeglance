@@ -26,9 +26,11 @@
 
 需要关机后仍能定时检索时，可部署文末的 GitHub 工作流。
 
-1. 打开「API 与设置」，选择 **Semantic Scholar**，把已经获批的 API Key 填在「检索 API Key」，然后点「保存设置」。勾选「记住本次输入的密钥」会用 Windows DPAPI 加密保存。密钥绑定到对应服务，自定义服务还会绑定到其配置的接口地址。
-2. 回到「论文库」，选一个频道或「全部频道」，点「检索新论文」。点击论文可以查看摘要、来源提供的关键词、学科分类和实际命中的检索词。OpenAlex 提供的是索引关键词。Semantic Scholar 有摘要和学科分类字段，论文记录缺失的信息会在界面明确标注。
-3. 收藏、检索结果和已完成的译文会保存在此 Windows 用户的 `%LOCALAPPDATA%\PaperWatch`。GitHub 定时任务使用部署仓库内的 `channels.json`，启用前请先配置至少一个频道。
+### 配置检索服务和密钥
+
+1. 打开「API 与设置」，选择要使用的检索服务。Crossref 可以直接使用。选择默认的 Semantic Scholar 时，在「检索 API Key」填入该服务发给你的密钥。使用自己的 JSON 接口时，选择「自定义 JSON」，在配置框填写接口地址、查询参数、认证方式和字段映射，密钥填在独立的「检索 API Key」栏。
+2. 点击「保存设置」。接口配置保存在当前 Windows 用户的 `%LOCALAPPDATA%\PaperWatch\settings.json`。Windows 客户端默认勾选「记住本次输入的密钥」，使用 Windows DPAPI 加密保存到同一目录的 `credentials.json`。取消勾选时，本次输入的密钥只在当前会话使用。自定义服务的密钥与接口地址绑定。
+3. 回到「论文库」，选一个频道或「全部频道」，点「检索新论文」。点击论文可以查看摘要、来源提供的关键词、学科分类和实际命中的检索词。收藏、检索结果和已完成的译文保存在本机论文库。
 
 ### 摘要翻译
 
@@ -54,11 +56,11 @@ Semantic Scholar 是检索服务。点击翻译时，客户端只把当前摘要
 - `items` 和 `next` 是列表和下一页标记的路径，例如 `results` 和 `meta.next_cursor`。`map` 关联论文标题、摘要、关键词等字段。`authors[].name` 可读取数组中所有对象的 `name`。根数组用 `$`。
 - `query_style` 支持 `boolean`（AND / OR）、`semantic`（加号 / 竖线）或 `keywords`（空格分隔）。客户端仍会按频道规则过滤返回的标题和摘要。
 
-需要 OAuth 登录、专有签名或 XML 响应的服务，需要新增一个专用适配器。GitHub 托管的原有定时工作流继续使用 Semantic Scholar 和 Telegram。下面是云端部署步骤。
+需要 OAuth 登录、专有签名或 XML 响应的服务，需要新增一个专用适配器。
 
 ## GitHub 云端运行
 
-启用定时任务后，GitHub Actions 默认每天 **09:07（日本时间）**运行，检索前一个自然日发表的论文，并把简报送到 Telegram 私聊。GitHub 定时任务可能延后，简报也受论文收录时间影响。
+仓库随附的 GitHub Actions 工作流使用 Semantic Scholar 检索、用 Telegram 发送简报。启用后默认每天 **09:07（日本时间）**运行，检索前一个自然日发表的论文。GitHub 定时任务可能延后，简报也受论文收录时间影响。
 
 频道、A／B 组和屏蔽词位于 `channels.json`。每次运行最多发出 20 次检索请求，包含各频道的检索、翻页和重试。一次手动运行有独立预算。向 Semantic Scholar 发出的请求至少间隔 1.05 秒。程序只用 Python 标准库，要求 Python 3.10 或更新版本。
 
@@ -75,7 +77,7 @@ python bot.py --chat-id
 ## 2. 部署到 GitHub
 
 1. Fork 此项目，或把源码上传到自己的 GitHub 仓库。保留 `.github/workflows/paper-watch.yml`，并在默认分支的 `channels.json` 中配置至少一个频道。希望频道配置仅自己可见时，使用私有仓库。
-2. 在仓库的 **Settings → Secrets and variables → Actions → New repository secret** 添加以下三个值。
+2. 在仓库的 **Settings → Secrets and variables → Actions → New repository secret** 添加以下三个值。工作流中出现的是 Secret 名称，实际密钥由 GitHub 在运行时提供。
 
    | Secret | 值 |
    | --- | --- |

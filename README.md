@@ -24,15 +24,17 @@ The Windows desktop app tracks new research papers across configurable search ch
 1. 下载并解压源码，确认已安装 **Python 3.10+** 和随标准安装提供的 **Tkinter**。
 2. 双击 `launch_client.cmd`。也可以在项目目录运行 `python -X utf8 desktop.py`。
 3. 在「频道与屏蔽词」创建第一个频道，填写频道名称与 A、B 两组检索词。
-4. 在「API 与设置」选择检索来源。使用 Semantic Scholar 时，填入该服务发放的 API Key 并保存。
+4. 在「API 与设置」选择检索来源。需要认证时，填入该服务发给你的 API Key 并保存。想先试用，可以选择无需 API Key 的 Crossref。
 5. 回到「论文库」，选择频道并点击「检索新论文」。自动检索间隔可在「定时检索」调整。
 
-## 检索来源
+## 支持的检索服务
 
-- **Semantic Scholar** 提供论文检索、摘要和学科分类。字段是否返回取决于该条记录。
+- **Semantic Scholar** 是桌面端默认选中的第三方检索服务，支持论文检索、摘要和学科分类。使用时需填写你自己申请的 API Key。
 - **OpenAlex** 提供论文元数据和索引关键词。API Key 用于持续使用及翻页。
 - **Crossref** 支持无需密钥的公开检索。摘要由元数据提供方提交，覆盖因论文而异。
 - **自定义 JSON** 支持常见 REST API 的 GET／POST、密钥认证、字段映射及游标分页。接口可用的检索语法及元数据范围取决于服务。
+
+项目公开的是检索适配代码和服务的公共接口地址。自定义 JSON 的接口配置保存在本机。勾选「记住本次输入的密钥」时，桌面端用 Windows 加密保存 API Key。取消勾选时，输入的密钥只在当前会话使用。GitHub Actions 的密钥通过仓库的 Actions Secrets 配置。
 
 ## 本地运行与云端部署
 
@@ -40,6 +42,6 @@ The Windows desktop app tracks new research papers across configurable search ch
 | --- | --- | --- |
 | Windows 客户端 | 客户端打开且设备处于唤醒状态，支持最小化 | 本地历史、收藏与译文 |
 | Docker 常驻服务 | Linux 服务器保持在线，由 Docker 管理进程 | Telegram 简报，以及 `/status` 和 `/search` 指令 |
-| GitHub Actions | 默认每天日本时间 09:07，检索前一自然日 | Telegram 简报 |
+| GitHub Actions | 通过仓库 Secrets 配置 Semantic Scholar 和 Telegram，默认每天日本时间 09:07 检索前一自然日 | Telegram 简报 |
 
 [使用指南、API 配置与 GitHub Actions 部署](docs/usage.md) · [Linux 服务器常驻部署](docs/server.md)

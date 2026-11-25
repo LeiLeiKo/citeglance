@@ -16,7 +16,7 @@ Docker 版本在 Linux 云服务器上常驻运行。它使用 Semantic Scholar 
 
 1. 在云服务商控制台准备一台带 Python 3、Docker Engine 和 Docker Compose 的 Linux 服务器，并添加你的 SSH 公钥。SSH 用户需要有 Docker 权限。
 2. 打开客户端「云端部署」。填入 IP 或域名、SSH 用户及端口。若有指定的私钥文件，点「选择私钥」；使用默认密钥或已加载到 SSH Agent 的密钥时可留空。首次连接可点「首次 SSH 连接」，和服务器控制台核对指纹，确认后再点「检测服务器」。
-3. 通过 Telegram 的 `@BotFather` 创建 Bot，向它发 `/start`。在客户端填写 Token 后点「获取私聊 ID」，或填入已有的 ID。Semantic Scholar Key 一栏留空时可以复用客户端保存的检索密钥。
+3. 通过 Telegram 的 `@BotFather` 创建 Bot，向它发 `/start`。在客户端填写 Token 后点「获取私聊 ID」，或填入已有的 ID。Semantic Scholar Key 一栏填写该服务发给你的密钥，留空时可以复用客户端保存的 Semantic Scholar 密钥。部署用的密钥通过 SSH 传到服务器。
 4. 在客户端保存至少一个频道，再点「部署或更新」。客户端通过 SSH 传输服务文件和当前频道，设置频率和用量上限，启动 Docker。完成后可用「查看云端状态」「查看云端日志」检查，再到 Telegram 发 `/status` 验证。
 
 之后要同步频道、修改频率或更新程序，再点「部署或更新」。部署沿用 Docker 项目名 `paper-watch` 及原有数据卷。服务可在 Windows 客户端关闭后独立运行。
