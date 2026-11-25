@@ -17,7 +17,7 @@ The Windows desktop app tracks new research papers across configurable search ch
 | 本地论文库 | 查看标题、作者、发表日期、来源关键词、学科分类和摘要。检索结果自动去重，可收藏并查看历史。 |
 | 摘要翻译 | 通过 DeepL、OpenAI 兼容服务或 LibreTranslate 翻译摘要，可选简体中文、日语和英语。已有译文保存在本机。 |
 | 三语界面 | 简体中文、English、日本語可即时切换，选择会记住。 |
-| 可选云端运行 | 可部署 GitHub Actions，每天通过 Telegram 私聊接收简报。 |
+| 可选云端运行 | 可用 Docker 在 Linux 服务器常驻，从 Telegram 随时查询状态或触发检索，也可用 GitHub Actions 定时发送简报。 |
 
 ## 快速开始
 
@@ -37,11 +37,10 @@ The Windows desktop app tracks new research papers across configurable search ch
 
 ## 本地运行与云端部署
 
-| | Windows 客户端 | GitHub Actions |
+| 方式 | 运行条件 | 结果 |
 | --- | --- | --- |
-| 何时运行 | 客户端打开且设备处于唤醒状态，支持最小化 | 启用后由 GitHub 执行，默认每天日本时间 09:07 |
-| 结果查看 | 本地历史、收藏与译文 | Telegram 简报 |
-| 检索来源 | Semantic Scholar、OpenAlex、Crossref、自定义 JSON | Semantic Scholar |
-| 配置 | 桌面界面和本地频道文件 | 仓库变量、Secrets 和 `channels.json` |
+| Windows 客户端 | 客户端打开且设备处于唤醒状态，支持最小化 | 本地历史、收藏与译文 |
+| Docker 常驻服务 | Linux 服务器保持在线，由 Docker 管理进程 | Telegram 简报，以及 `/status` 和 `/search` 指令 |
+| GitHub Actions | 启用后由 GitHub 执行，默认每天日本时间 09:07 | Telegram 简报 |
 
-[使用指南、API 配置与 GitHub Actions 部署](docs/usage.md)
+[使用指南、API 配置与 GitHub Actions 部署](docs/usage.md) · [Linux 服务器常驻部署](docs/server.md)

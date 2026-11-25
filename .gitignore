@@ -3,6 +3,9 @@ __pycache__/
 *.tmp
 .env
 .env.*
+!.env.example
+.secrets/
+data/
 settings.json
 credentials.json
 papers.sqlite3*

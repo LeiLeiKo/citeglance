@@ -56,10 +56,11 @@ def request_json(url, *, service, headers=None, body=None, redirects=True):
 
 
 class PaperSearch:
-    def __init__(self, api_key, *, fields=FIELDS, budget=REQUEST_BUDGET):
+    def __init__(self, api_key, *, fields=FIELDS, budget=REQUEST_BUDGET, before_request=None):
         self.api_key = api_key
         self.fields = fields
         self.budget = budget
+        self.before_request = before_request
         self.used = 0
         self.last_started = None
 
@@ -78,6 +79,8 @@ class PaperSearch:
                 raise ServiceError(f"已用完本次运行的 {self.budget} 次请求预算")
             if self.last_started is not None:
                 time.sleep(max(0, self.last_started + 1.05 - time.monotonic()))
+            if self.before_request is not None:
+                self.before_request()
             self.last_started = time.monotonic()
             self.used += 1
             try:

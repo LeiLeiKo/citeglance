@@ -1,0 +1,37 @@
+services:
+  paper-watch:
+    build: .
+    env_file: .env
+    environment:
+      PAPER_WATCH_DATA_DIR: /data
+      SEMANTIC_SCHOLAR_API_KEY_FILE: /run/secrets/semantic_scholar_api_key
+      TELEGRAM_BOT_TOKEN_FILE: /run/secrets/telegram_bot_token
+    secrets:
+      - semantic_scholar_api_key
+      - telegram_bot_token
+    volumes:
+      - paper-watch-data:/data
+      - ./channels.json:/app/channels.json:ro
+    init: true
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+    stop_grace_period: 45s
+    healthcheck:
+      test: ["CMD", "python", "server.py", "--healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 35s
+
+secrets:
+  semantic_scholar_api_key:
+    file: ./.secrets/semantic_scholar_api_key
+  telegram_bot_token:
+    file: ./.secrets/telegram_bot_token
+
+volumes:
+  paper-watch-data:
