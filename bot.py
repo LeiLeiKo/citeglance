@@ -277,12 +277,8 @@ def ranked_papers(papers, channels, exclude, reported):
 
     def display_priority(row):
         paper, matches, _, _ = row
-        pavanatto = any(
-            "pavanatto" in match_text(author.get("name") or "")
-            for author in (paper.get("authors") or [])
-        )
         primary = min(match[0] for match in matches)
-        return -primary, primary == 1 and pavanatto, paper.get("publicationDate") or ""
+        return -primary, paper.get("publicationDate") or ""
 
     return sorted(selected, key=display_priority, reverse=True)
 
@@ -343,6 +339,7 @@ def main():
     argparse_modes = parser.add_mutually_exclusive_group()
     argparse_modes.add_argument("--chat-id", action="store_true", help="安全查询 Telegram 私聊 ID")
     argparse_modes.add_argument("--dry-run", action="store_true", help="只在终端预览")
+    parser.add_argument("--previous-day", action="store_true", help="仅检索日本时间的前一天，不读写检索记录")
     args = parser.parse_args()
 
     token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
@@ -359,6 +356,9 @@ def main():
             print(chat_id)
         return 0
 
+    channels, excluded = load_channels()
+    if not channels:
+        raise ServiceError("请先在客户端添加一个频道，或在 channels.json 中配置频道。")
     api_key = os.getenv("SEMANTIC_SCHOLAR_API_KEY", "").strip()
     if not api_key:
         raise ServiceError("请配置 SEMANTIC_SCHOLAR_API_KEY")
@@ -368,10 +368,16 @@ def main():
         raise ServiceError("请配置 TELEGRAM_BOT_TOKEN 和数字格式的 Telegram 私聊 ID")
 
     today = datetime.now(JAPAN_TIME).date()
-    channels, excluded = load_channels()
-    state = load_state()
+    lookback = 14
+    if args.previous_day:
+        today -= timedelta(days=1)
+        state = {"reported": [], "last_complete": {}}
+        lookback = 1
+    else:
+        state = load_state()
+    persist_state = not dry_run and not args.previous_day
     search = PaperSearch(api_key)
-    papers, failures, complete = scan(channels, state, today, search)
+    papers, failures, complete = scan(channels, state, today, search, lookback=lookback)
     reported = set(state["reported"])
     rows = ranked_papers(papers, channels, excluded, reported)
     for index, (message, keys) in enumerate(report_chunks(today, rows, failures, search.used)):
@@ -384,11 +390,11 @@ def main():
             token, "sendMessage", chat_id=int(chat_id), text=message,
             link_preview_options={"is_disabled": True},
         )
-        if keys:
+        if keys and persist_state:
             reported.update(keys)
             state["reported"] = sorted(reported)
             save_state(state)
-    if not dry_run and complete:
+    if complete and persist_state:
         state["last_complete"].update(dict.fromkeys(complete, today.isoformat()))
         save_state(state)
     if failures:

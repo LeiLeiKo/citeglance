@@ -21,7 +21,7 @@ from desktop_store import (
     DATA_DIRECTORY, INTERVAL_SECONDS, Library, Secrets, clean_terms, read_json, saved_settings,
     translation_key, validate_channels, write_json,
 )
-from i18n import INTERFACE_LANGUAGES, PRESET_CHANNELS, translate, translate_error
+from i18n import INTERFACE_LANGUAGES, translate, translate_error
 from providers import (
     CUSTOM_SEARCH, LANGUAGES, SEARCH_PROVIDERS, TRANSLATION_ENDPOINTS, TRANSLATORS,
     endpoint_url, make_search, translate_abstract, validate_custom,
@@ -316,6 +316,8 @@ class PaperWatch(tk.Tk):
         side = ttk.Frame(tab, padding=(0, 0, 14, 0))
         side.grid(row=0, column=0, sticky="nsew")
         self.label(side, "频道", style="Heading.TLabel").pack(anchor="w", pady=(0, 8))
+        self.channel_empty_hint = self.label(side, "还没有频道。填写频道名称和两组检索词，即可保存第一个频道。",
+                                             style="Hint.TLabel", wraplength=205, justify="left")
         self.channel_list = tk.Listbox(side, width=27, height=12, exportselection=False, font=FONT,
                                        activestyle="none", bg=WHITE, fg=INK, relief="flat",
                                        highlightthickness=0, selectbackground=BLUE)
@@ -689,9 +691,13 @@ class PaperWatch(tk.Tk):
         self.fill_channel(active)
 
     def refresh_channel_labels(self, selected=None):
-        self.channel_values = [ALL, *(self.channel_key(row) for row in self.lookup)]
-        labels = [self.channel_label(row) for row in self.lookup]
+        labels = [self.channel_key(row) for row in self.lookup]
+        self.channel_values = [ALL, *labels]
         self.channel_combo.configure(values=[self.t(ALL), *labels])
+        if labels:
+            self.channel_empty_hint.pack_forget()
+        elif not self.channel_empty_hint.winfo_manager():
+            self.channel_empty_hint.pack(before=self.channel_list, anchor="w", pady=(0, 8))
         current = self.picked_channel.get()
         if current not in self.channel_values:
             current = ALL
@@ -707,13 +713,6 @@ class PaperWatch(tk.Tk):
     @staticmethod
     def channel_key(row):
         return f'{row["id"]} · {row["name"]}'
-
-    def channel_label(self, row):
-        index = row["id"] - 1
-        name = row["name"]
-        if 0 <= index < len(PRESET_CHANNELS) and name == PRESET_CHANNELS[index]:
-            name = self.t(name)
-        return f'{row["id"]} · {name}'
 
     def pick_channel(self, _):
         index = self.channel_combo.current()
@@ -753,6 +752,7 @@ class PaperWatch(tk.Tk):
         self.config_data = replacement
         if refresh:
             self.refresh_channels(selected)
+            self.render_detail()
         self.set_status(message, **fields)
         self.wake_schedule()
 
@@ -906,7 +906,9 @@ class PaperWatch(tk.Tk):
         self.detail.configure(state="normal")
         self.detail.delete("1.0", "end")
         if not paper:
-            self.detail.insert("end", self.t("选择频道并检索，或从历史中打开一篇论文。"), "muted")
+            hint = ("选择频道并检索，或从历史中打开一篇论文。" if self.lookup
+                    else "请先在「频道与屏蔽词」添加一个频道。")
+            self.detail.insert("end", self.t(hint), "muted")
         else:
             self.detail.insert("end", paper["title"] + "\n", "title")
             authors = [author.get("name") for author in paper.get("authors") or [] if author.get("name")]
@@ -986,8 +988,6 @@ class PaperWatch(tk.Tk):
         key_endpoint = settings["custom"].get("endpoint", "") if provider == "自定义 JSON" else ""
         fallback = os.getenv("SEMANTIC_SCHOLAR_API_KEY", "") if provider == "Semantic Scholar" else ""
         try:
-            key = self.secrets.get(self.key_slot("search", provider, key_endpoint), fallback)
-            search, query_for = make_search(provider, key, settings["budget"], settings["custom"])
             channels, exclude = bot.load_channels(self.config_data)
             selected = ALL if automatic else self.picked_channel.get()
             active = channels if selected == ALL else [
@@ -995,6 +995,8 @@ class PaperWatch(tk.Tk):
             ]
             if not active:
                 raise ValueError("请先在「频道与屏蔽词」添加一个频道。")
+            key = self.secrets.get(self.key_slot("search", provider, key_endpoint), fallback)
+            search, query_for = make_search(provider, key, settings["budget"], settings["custom"])
             if not automatic:
                 self.settings["channel"] = selected
                 write_json(self.directory / "settings.json", self.settings)

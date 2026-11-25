@@ -8,4 +8,5 @@ __pycache__/
 data/
 settings.json
 credentials.json
+/state.json
 papers.sqlite3*

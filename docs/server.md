@@ -17,7 +17,7 @@ Docker 版本在 Linux 云服务器上常驻运行。它使用 Semantic Scholar 
 1. 在云服务商控制台准备一台带 Python 3、Docker Engine 和 Docker Compose 的 Linux 服务器，并添加你的 SSH 公钥。SSH 用户需要有 Docker 权限。
 2. 打开客户端「云端部署」。填入 IP 或域名、SSH 用户及端口。若有指定的私钥文件，点「选择私钥」；使用默认密钥或已加载到 SSH Agent 的密钥时可留空。首次连接可点「首次 SSH 连接」，和服务器控制台核对指纹，确认后再点「检测服务器」。
 3. 通过 Telegram 的 `@BotFather` 创建 Bot，向它发 `/start`。在客户端填写 Token 后点「获取私聊 ID」，或填入已有的 ID。Semantic Scholar Key 一栏留空时可以复用客户端保存的检索密钥。
-4. 点「部署或更新」。客户端通过 SSH 传输服务文件和当前频道，设置频率和用量上限，启动 Docker。完成后可用「查看云端状态」「查看云端日志」检查，再到 Telegram 发 `/status` 验证。
+4. 在客户端保存至少一个频道，再点「部署或更新」。客户端通过 SSH 传输服务文件和当前频道，设置频率和用量上限，启动 Docker。完成后可用「查看云端状态」「查看云端日志」检查，再到 Telegram 发 `/status` 验证。
 
 之后要同步频道、修改频率或更新程序，再点「部署或更新」。部署沿用 Docker 项目名 `paper-watch` 及原有数据卷。服务可在 Windows 客户端关闭后独立运行。
 
@@ -41,7 +41,8 @@ docker info --format '{{.ServerVersion}}'
 
 - 使用一台持续在线、可运行 Docker Engine 和 Compose 插件的 Linux 服务器。Ubuntu 可按 [Docker 官方安装指南](https://docs.docker.com/engine/install/ubuntu/)安装。
 - 在 Telegram 中通过 `@BotFather` 创建 Bot，打开私聊并发送 `/start`。可以在现有 Windows 客户端目录运行 `python -X utf8 bot.py --chat-id`，从隐藏输入框输入 Bot Token，获取自己的数字私聊 ID。
-- 将源码包解压到服务器，或在服务器配置好私有仓库访问后克隆此项目。以下命令均在服务器的项目根目录运行。
+- 将源码包解压到服务器，或从 GitHub 克隆项目。以下命令均在服务器的项目根目录运行。
+- 在 `channels.json` 中配置至少一个频道。也可以把在 Windows 客户端编辑好的频道配置复制到服务器。
 - 同一个 Bot Token 保留一个长轮询进程。若用同一枚 Semantic Scholar Key 运行其他定时器，服务器无法统计那些调用。切换部署方式时，可以先关闭原有 GitHub Actions 日程或桌面定时检索。
 
 ### 2. 配置服务器
@@ -53,7 +54,7 @@ cp .env.example .env
 nano .env
 ~~~~
 
-填写 `TELEGRAM_CHAT_ID`。`PAPER_WATCH_INTERVAL_MINUTES` 默认是 `1440`，即每 24 小时一轮。要每小时检索，可改为 `60`。`PAPER_WATCH_DAILY_BUDGET` 默认是滚动 24 小时 `20` 次，两种触发方式共用这个额度，分页和重试也计入。四个频道每轮基础需 4 次请求，按每小时检索的基础用量是 96 次／24 小时。额度不足时，服务会等待额度恢复。
+填写 `TELEGRAM_CHAT_ID`。`PAPER_WATCH_INTERVAL_MINUTES` 默认是 `1440`，即每 24 小时一轮。要每小时检索，可改为 `60`。`PAPER_WATCH_DAILY_BUDGET` 默认是滚动 24 小时 `20` 次，两种触发方式共用这个额度，分页和重试也计入。每日基础用量约等于频道数乘以每日检索轮数。额度不足时，服务会等待额度恢复。
 
 以下 Bash 命令会提示你分别粘贴两项密钥，输入时隐藏。密钥文件所在目录仅当前服务器账户可访问，文件设为容器内的非 root 用户可读。
 

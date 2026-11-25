@@ -4,12 +4,6 @@ import re
 
 
 INTERFACE_LANGUAGES = {"zh": "简体中文", "en": "English", "ja": "日本語"}
-PRESET_CHANNELS = (
-    "AR 虚拟扩展屏与混合显示",
-    "电竞／体育观赛与 AR、第二屏或 HUD",
-    "AR 周边提示与人类视觉注意力",
-    "电竞观众动机、观赛行为与眼动",
-)
 
 TEXT = {
     "CiteGlance · 文献雷达": ("CiteGlance", "CiteGlance · 論文レーダー"),
@@ -31,6 +25,10 @@ TEXT = {
     "翻译摘要": ("Translate abstract", "要旨を翻訳"),
     "频道与屏蔽词": ("Channels & filters", "チャンネルと除外語"),
     "新增频道": ("New channel", "チャンネルを追加"),
+    "还没有频道。填写频道名称和两组检索词，即可保存第一个频道。": (
+        "No channels yet. Enter a name and two groups of search terms to save your first channel.",
+        "チャンネルがありません。名前と2グループの検索語を入力し、最初のチャンネルを保存してください。",
+    ),
     "删除所选频道": ("Delete selected channel", "選択したチャンネルを削除"),
     "每行一个词组。A、B 两组都需至少命中一项。": (
         "Enter one phrase per line. At least one phrase from each group must match.",
@@ -196,10 +194,6 @@ TEXT = {
     "简体中文": ("Simplified Chinese", "簡体字中国語"),
     "日语": ("Japanese", "日本語"),
     "英语": ("English", "英語"),
-    "AR 虚拟扩展屏与混合显示": ("AR virtual monitors and hybrid displays", "AR仮想モニターとハイブリッド表示"),
-    "电竞／体育观赛与 AR、第二屏或 HUD": ("Esports and sports viewing with AR, second screens, or HUDs", "eスポーツ・スポーツ観戦とAR、セカンドスクリーン、HUD"),
-    "AR 周边提示与人类视觉注意力": ("AR peripheral cues and human visual attention", "ARの周辺視野への提示と人の視覚的注意"),
-    "电竞观众动机、观赛行为与眼动": ("Esports viewing motivation, behavior, and eye tracking", "eスポーツの観戦動機・行動と視線計測"),
     "编辑频道 {number}": ("Edit channel {number}", "チャンネル{number}を編集"),
     "频道文件已在其他窗口修改。请重新打开客户端后再编辑。": (
         "The channel file changed in another window. Reopen the client before editing.",

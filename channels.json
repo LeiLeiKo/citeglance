@@ -1,34 +1,4 @@
 {
-  "channels": [
-    {
-      "id": 1,
-      "name": "AR 虚拟扩展屏与混合显示",
-      "a": ["virtual monitor", "virtual monitors", "virtual display", "hybrid display", "extended display", "multi-display"],
-      "b": ["augmented reality", "optical see-through", "smart glasses", "head-mounted display"]
-    },
-    {
-      "id": 2,
-      "name": "电竞／体育观赛与 AR、第二屏或 HUD",
-      "a": ["esports", "e-sports", "League of Legends", "MOBA", "sports spectatorship", "live streaming"],
-      "b": ["augmented reality", "second screen", "companion screen", "HUD", "overlay", "spectator interface"]
-    },
-    {
-      "id": 3,
-      "name": "AR 周边提示与人类视觉注意力",
-      "a": ["glanceable", "peripheral display", "split-attention", "cognitive load", "situation awareness", "visual attention", "head movement"],
-      "b": ["augmented reality", "smart glasses", "spatial UI", "head-mounted display"]
-    },
-    {
-      "id": 4,
-      "name": "电竞观众动机、观赛行为与眼动",
-      "a": ["esports", "League of Legends", "MOBA"],
-      "b": ["spectator", "viewing motivation", "viewing experience", "eye-tracking", "eye tracking", "uses and gratifications"]
-    }
-  ],
-  "exclude": [
-    "transformer", "large language model", "LLM", "neural network", "self-attention", "diffusion",
-    "autonomous driving", "automotive", "driver", "vehicle", "cockpit", "aviation",
-    "surgery", "surgical", "medical", "clinical", "patient", "manufacturing", "assembly",
-    "waveguide", "holography", "metasurface", "SLAM", "pose estimation"
-  ]
+  "channels": [],
+  "exclude": []
 }
