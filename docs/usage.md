@@ -90,9 +90,11 @@ python bot.py --chat-id
 3. 到 **Actions → CiteGlance 每日检索 → Run workflow**。首次保持「仅检索并预览，不发送 Telegram」勾选，在运行日志看检索结果。这一步需要 Semantic Scholar API Key。
 4. 确认结果后，可以手动取消预览勾选运行一次，验证 Telegram 能收到简报。要启用日程，在 **Settings → Secrets and variables → Actions → Variables** 添加仓库变量 `PAPER_WATCH_CLOUD_ENABLED`，值设为 `true`。启用后每天由 GitHub 运行。重复手动运行会产生额外 API 请求。
 
-要修改 GitHub Actions 的检索时间，在你的仓库默认分支编辑 `.github/workflows/paper-watch.yml` 的 `on.schedule`。Cron 前两项依次是分钟、小时。保留 `timezone: 'Asia/Tokyo'`，例如把 `cron` 改为 `'30 9 * * *'`，即每天日本时间 09:30。
-
 云端密钥通过 GitHub Secrets 配置。桌面端可以使用 Windows 加密保存。命令行推送的历史保存在运行目录的 `state.json`，桌面端和 Docker 服务使用各自的 SQLite 数据库。GitHub Actions 只有仓库读取权限，每轮独立运行。同一天重复运行可能收到相同的论文，较晚收录的论文也可能超出检索范围。
+
+### 自定义 GitHub Actions 检索时间
+
+在你的仓库默认分支编辑 `.github/workflows/paper-watch.yml` 的 `on.schedule`。Cron 前两项依次是分钟、小时。保留 `timezone: 'Asia/Tokyo'`，例如把 `cron` 改为 `'30 9 * * *'`，即每天日本时间 09:30。
 
 ## 检索和简报
 

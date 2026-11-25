@@ -40,11 +40,11 @@ The Windows desktop app supports Semantic Scholar, OpenAlex, Crossref, and confi
 
 ## 本地运行与云端部署
 
-| 方式 | 支持的检索来源 | 运行方式 |
+| 方式 | 支持的检索来源 | 运行与调度 |
 | --- | --- | --- |
 | Windows 客户端 | Semantic Scholar、OpenAlex、Crossref、自定义 JSON API | 手动检索，或在客户端打开且设备唤醒时定时检索 |
 | 命令行 `bot.py` | Semantic Scholar | 手动运行，终端预览或推送 Telegram 简报 |
-| Docker 常驻服务 | Semantic Scholar | Linux 服务器按每日固定时间（JST）或间隔推送 Telegram 简报，支持 `/status` 和 `/search` |
-| GitHub Actions | Semantic Scholar | 通过仓库 Secrets 配置密钥，启用后默认每天日本时间 09:07 检索前一自然日并推送 Telegram 简报 |
+| Docker 常驻服务 | Semantic Scholar | 在客户端「云端部署 → 每天检索时间（JST）」设置固定时间，留空则按间隔运行。 [设置步骤](docs/server.md#从-windows-客户端部署) |
+| GitHub Actions | Semantic Scholar | 默认每天日本时间 09:07，可编辑工作流的 `cron` 调整。每轮检索前一自然日并推送 Telegram 简报。 [修改时间](docs/usage.md#自定义-github-actions-检索时间) |
 
 [使用指南、API 配置与 GitHub Actions 部署](docs/usage.md) · [Linux 服务器常驻部署](docs/server.md)
