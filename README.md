@@ -1,10 +1,10 @@
 # CiteGlance · 文献雷达
 
+**简体中文** · [日本語](README.ja.md) · [English](README.en.md)
+
 CiteGlance 是一个 Windows 学术论文追踪客户端。你可以为任何研究主题建立检索频道，定时查找近期论文，在同一个窗口阅读摘要、核对关键词、收藏论文和保存译文。
 
 **Windows 客户端支持 Semantic Scholar、OpenAlex、Crossref 和自定义 JSON API。** 手动和定时检索都使用你在「API 与设置」选择的来源。仓库附带的命令行、Docker 常驻服务和 GitHub Actions 目前仅支持 Semantic Scholar。
-
-The Windows desktop app supports Semantic Scholar, OpenAlex, Crossref, and configurable JSON APIs for manual and scheduled searches. The bundled CLI, Docker service, and GitHub Actions workflow currently support Semantic Scholar only.
 
 ![CiteGlance 的论文库。左侧显示按频道检索到的论文，右侧显示来源、命中的检索词和摘要。](docs/images/library.png)
 

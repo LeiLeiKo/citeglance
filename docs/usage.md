@@ -1,6 +1,8 @@
 # CiteGlance 使用与部署指南
 
-[返回项目首页](../README.md)
+**简体中文** · [日本語](usage.ja.md) · [English](usage.en.md)
+
+[返回项目首页](../README.md) · [Linux 服务器部署指南](server.md)
 
 ## Windows 客户端
 
@@ -78,7 +80,7 @@ python bot.py --chat-id
 
 ## 2. 部署到 GitHub
 
-1. Fork 此项目，或把源码上传到自己的 GitHub 仓库。保留 `.github/workflows/paper-watch.yml`，并在默认分支的 `channels.json` 中配置至少一个频道。希望频道配置仅自己可见时，使用私有仓库。
+1. Fork 此项目，或把源码上传到自己的 GitHub 仓库。希望频道配置仅自己可见时，把源码上传到单独创建的私有仓库。保留 `.github/workflows/paper-watch.yml`，并在默认分支的 `channels.json` 中配置至少一个频道。
 2. 在仓库的 **Settings → Secrets and variables → Actions → New repository secret** 添加以下三个值。工作流中出现的是 Secret 名称，实际密钥由 GitHub 在运行时提供。
 
    | Secret | 值 |

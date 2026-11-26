@@ -1,6 +1,8 @@
 # CiteGlance · Linux 服务器常驻部署
 
-[返回项目首页](../README.md)
+**简体中文** · [日本語](server.ja.md) · [English](server.en.md)
+
+[返回项目首页](../README.md) · [使用与部署指南](usage.md)
 
 Docker 版本在 Linux 云服务器上常驻运行。它使用 Semantic Scholar 检索 `channels.json` 中的频道，把简报发到指定的 Telegram 私聊。这个服务通过 Telegram 长轮询接收命令，只需服务器能够向 Semantic Scholar 和 Telegram 发起 HTTPS 请求。
 
@@ -80,7 +82,7 @@ docker compose ps
 docker compose logs --tail=50 paper-watch
 ~~~~
 
-在 Telegram 私聊中发 `/status` 验证响应。首次启动且额度充足时，会自动检索一轮。容器可随 Docker 重启恢复，SQLite 数据卷保存检索进度、已报告论文、请求额度和 Telegram 更新位置。
+在 Telegram 私聊中发 `/status` 验证响应。固定时间模式会等到下一个设定时刻。间隔模式首次启动且额度充足时，会自动检索一轮。容器可随 Docker 重启恢复，SQLite 数据卷保存检索进度、已报告论文、请求额度和 Telegram 更新位置。
 
 ## 更新与维护
 
